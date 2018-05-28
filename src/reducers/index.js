@@ -1,6 +1,8 @@
 import {combineReducers} from 'redux';
-import input from './input';
+import trades from './trades';
+import ui from './ui';
 
 export default combineReducers({
-  input
+  trades,
+  ui
 })

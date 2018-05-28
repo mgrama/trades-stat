@@ -1,64 +1,113 @@
 import React, { Component } from 'react';
 import {connect} from 'react-redux';
-import logo from './logo.svg';
+import moment from 'moment';
 import './App.css';
 import {fetchTrades} from './actions/trades';
 
 class App extends Component {
 
 
-
-
-componentDidMount = () => {
-  /*const URL='https://api.bitflip.cc/method/market.getTrades';
-  axios.post(URL, {pair: 'btc:usd'}).then((resp) => {console.log(resp)})*/
+handleBTCUSDClick = (event) => {
+  event && event.preventDefault();
   this.props.fetchTrades('btc:usd');
 }
 
+handleLTCUSDClick = (event) => {
+  event && event.preventDefault();
+  this.props.fetchTrades('ltc:usd');
+}
 
+handleETHUSDClick = (event) => {
+  event && event.preventDefault();
+  this.props.fetchTrades('eth:usd');
+}
 
-  handleClick = (event) => {
-    this.props.updateKey(event.target.value);
+renderRows = () => {
+  const {trades, isFetching} = this.props;
+  if (!isFetching) {
+    return Object.values(trades)
+      .filter((trade) => trade.timestamp * 1000 > moment().subtract(1, 'day').valueOf())
+      .map((trade) => (
+      <tr key={trade.id}>
+        <td>{trade.type.toUpperCase()}</td>
+        <td>{trade.amount}</td>
+        <td>{trade.rate}</td>
+        <td>{trade.price}</td>
+        <td>{moment.unix(trade.timestamp).format('YYYY-MM-DD HH:mm:ss')}</td>
+      </tr>
+    ))
   }
+  return (
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  );
+}
 
-  handleFocus = () => {
-    this.props.updateKey('жопа');
+renderLoader = () => {
+  const {isFetching} = this.props;
+  if (isFetching) {
+    return <div>LOADING...</div>;
   }
+  return null;
+}
 
-  handleBlur = () => {
-    this.props.updateKey('');
+renderError = () => {
+  const {fetchingError} = this.props;
+  if (fetchingError) {
+    return <div>SOMETHING WENT WRONG, TRY AGAIN</div>;
   }
+}
 
   render() {
     return (
-      <form>
-        <button
-          //onClick={}
-          >
-          BTC / USD
-        </button>
-        <button
-          //onClick={}
-          >
-          LTC / USD
-        </button>
-        <button
-          //onClick={}
-          >
-          ETH / USD
-        </button>
-        <input
-          onChange={this.handleClick}
-          value={this.props.input}
-          onFocus={this.handleFocus}
-          onBlur={this.handleBlur}
-         />
-      </form>
+      <div className="Container">
+        <form>
+          <button onClick={this.handleBTCUSDClick}>
+            BTC / USD
+          </button>
+
+          <button onClick={this.handleLTCUSDClick}>
+            LTC / USD
+          </button>
+
+          <button onClick={this.handleETHUSDClick}>
+            ETH / USD
+          </button>
+        </form>
+
+        <br />
+
+        <table>
+          <tbody>
+            <tr>
+              <th>Operation</th>
+              <th>Amount</th>
+              <th>Rate</th>
+              <th>Price</th>
+              <th>Time</th>
+            </tr>
+            {this.renderRows()}
+          </tbody>
+        </table>
+
+        {this.renderLoader()}
+        {this.renderError()}
+
+      </div>
     );
   }
 }
 
-const mapStateToProps = (state) => ({input: state.input.input});
+const mapStateToProps = (state) => ({
+  trades: state.trades,
+  isFetching: state.ui.isFetching,
+  fetchingError: state.ui.fetchingError
+})
 
 const mapDispatchToProps = {fetchTrades};
 
